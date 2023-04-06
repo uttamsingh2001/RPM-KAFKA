@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/RPM Kafka Project.iml" filepath="$PROJECT_DIR$/.idea/RPM Kafka Project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/omron-consumer-service/omron-consumer-service.iml" filepath="$PROJECT_DIR$/omron-consumer-service/omron-consumer-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/omron-handler-service/omron-handler-service.iml" filepath="$PROJECT_DIR$/omron-handler-service/omron-handler-service.iml" />
+    </modules>
+  </component>
+</project>
