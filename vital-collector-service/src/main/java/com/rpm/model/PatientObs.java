@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Patient {
+public class PatientObs {
     private Long patientId;
-    private String obstermId;
+    private Long obstermId;
     private Double value;
     private String uomCode;
     private LocalDateTime effectiveDateTime;

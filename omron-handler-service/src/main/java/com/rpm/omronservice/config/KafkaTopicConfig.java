@@ -1,6 +1,5 @@
 package com.rpm.omronservice.config;
 
-
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +15,6 @@ public class KafkaTopicConfig   {
     @Bean
     public NewTopic omronTopic(){
         return TopicBuilder.name(topicName)
-                .build();
+                            .build();
     }
 }

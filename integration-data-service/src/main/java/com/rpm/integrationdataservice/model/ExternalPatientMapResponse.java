@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExternalPatientMapResponse {
-        private Long patientId;
+      private Long patientId;
+
 }

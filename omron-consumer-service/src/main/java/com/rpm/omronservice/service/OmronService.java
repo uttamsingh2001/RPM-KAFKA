@@ -1,7 +1,7 @@
 package com.rpm.omronservice.service;
 
 import com.rpm.model.Omron;
-import com.rpm.model.Patient;
+import com.rpm.model.PatientObs;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,60 +12,67 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.time.LocalDateTime;
 
 @Service
 @Log4j2
 public class OmronService {
+
+    private final KafkaTemplate<String, PatientObs> kafkaTemplate;
+    private final RestTemplate restTemplate;
+    private final String integrationServiceUrl;
+    private final String vitalTopic;
+
     @Autowired
-    private KafkaTemplate<String, Patient> kafkaTemplate;
-    @Value("${topic.name.producer}")
-    private String vitalTopic;
-    @Value("${integration.service.url}")
-    private String integrationServiceUrl;
-    @Autowired
-    private RestTemplate restTemplate = new RestTemplate();
+    public OmronService(KafkaTemplate<String, PatientObs> kafkaTemplate,
+                        RestTemplate restTemplate,
+                        @Value("${integration.service.url}") String integrationServiceUrl,
+                        @Value("${topic.name.producer}") String vitalTopic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.restTemplate = restTemplate;
+        this.integrationServiceUrl = integrationServiceUrl;
+        this.vitalTopic = vitalTopic;
+    }
 
     @KafkaListener(topics = "${topic.name.consumer}", groupId = "${spring.kafka.consumer.group-id}")
     public void consume(ConsumerRecord<String, Omron> payload) {
-
         Omron omron = payload.value();
-        log.info("Received following details from kafka broker {}", omron);
+        log.info("Received following details from Kafka broker {}", omron);
 
         Long userId = omron.getUserId();
-        String obstermId = omron.getExternalObstermId();
-        double value= omron.getValue();
-        String uomCode= omron.getUomCode();
-        LocalDateTime effectiveDateTime=omron.getEffectiveDateTime();
-        Patient patientId = getPatientId(userId);
+        Long obstermId = omron.getExternalObstermId();
+        Double value = omron.getValue();
+        String uomCode = omron.getUomCode();
+        LocalDateTime effectiveDateTime = omron.getEffectiveDateTime();
+        Long patientId = getPatientId(userId);
 
-        // Mapping UserId to PatientId
+        PatientObs patientObs = new PatientObs();
+        patientObs.setPatientId(patientId);
+        patientObs.setObstermId(obstermId);
+        patientObs.setValue(value);
+        patientObs.setUomCode(uomCode);
+        patientObs.setEffectiveDateTime(effectiveDateTime);
 
-        Patient patient=new Patient();
-        patient.setPatientId(patientId.getPatientId());
-        patient.setObstermId(obstermId);
-        patient.setValue(value);
-        patient.setUomCode(uomCode);
-        patient.setEffectiveDateTime(effectiveDateTime);
-
-        // Send the patient JSON object to the vital topic
-        kafkaTemplate.send(vitalTopic, patient);
-        log.info("Patient details sent to vital topic: {}", patient);
+        try {
+            kafkaTemplate.send(vitalTopic, patientObs);
+            log.info("Patient details sent to vital topic: {}", patientObs);
+        } catch (Exception e) {
+            log.error("Broker is down: {}", e.getMessage());
+        }
     }
 
-         // call integration service to get patient id using By externalPatientId
-        public Patient getPatientId(Long userId){
-            HttpEntity<Long> entity = new HttpEntity<>(userId);
-            Patient patient = restTemplate.exchange(integrationServiceUrl +"/"+ userId, HttpMethod.GET, entity, Patient.class).getBody();
-            log.info(patient);
-
-            return patient;
+    private Long getPatientId(Long userId) {
+        HttpEntity<Long> entity = new HttpEntity<>(userId);
+        PatientObs patientObs = restTemplate.exchange(
+                integrationServiceUrl + "/" + userId,
+                HttpMethod.GET,
+                entity,
+                PatientObs.class).getBody();
+        if (patientObs != null) {
+            return patientObs.getPatientId();
+        } else {
+            throw new RuntimeException("Failed to retrieve patient ID from integration service");
         }
+    }
 }
-
-
-
-
-
-
-

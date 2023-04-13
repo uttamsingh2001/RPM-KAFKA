@@ -23,11 +23,13 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>com.crossasyst</groupId>-->
-<!--			<artifactId>my-package</artifactId>-->
-<!--			<version>1.0.0</version>-->
-<!--		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.1.Final</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
