@@ -7,16 +7,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
-public class KafkaTopicConfig   {
-
+public class KafkaTopicConfig {
     @Value("${topic.name.producer}")
     public String topicName;
 
     @Bean
-    public NewTopic omronTopic(){
+    public NewTopic vitalTopic(){
         return TopicBuilder.name(topicName)
-                            .partitions(3)
-                            .replicas(2)
-                            .build();
+                .partitions(3)
+                .replicas(2)
+                .build();
     }
 }

@@ -22,17 +22,18 @@ public class OmronService {
     private final KafkaTemplate<String, PatientObs> kafkaTemplate;
     private final RestTemplate restTemplate;
     private final String integrationServiceUrl;
-    private final String vitalTopic;
+    @Value("${topic.name.producer}")
+    private String topicName;
 
     @Autowired
     public OmronService(KafkaTemplate<String, PatientObs> kafkaTemplate,
                         RestTemplate restTemplate,
-                        @Value("${integration.service.url}") String integrationServiceUrl,
-                        @Value("${topic.name.producer}") String vitalTopic) {
+                        @Value("${integration.service.url}") String integrationServiceUrl)
+                       {
         this.kafkaTemplate = kafkaTemplate;
         this.restTemplate = restTemplate;
         this.integrationServiceUrl = integrationServiceUrl;
-        this.vitalTopic = vitalTopic;
+
     }
 
     @KafkaListener(topics = "${topic.name.consumer}", groupId = "${spring.kafka.consumer.group-id}")
@@ -55,7 +56,7 @@ public class OmronService {
         patientObs.setEffectiveDateTime(effectiveDateTime);
 
         try {
-            kafkaTemplate.send(vitalTopic, patientObs);
+            kafkaTemplate.send(topicName, patientObs);
             log.info("Patient details sent to vital topic: {}", patientObs);
         } catch (Exception e) {
             log.error("Broker is down: {}", e.getMessage());
